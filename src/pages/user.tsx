@@ -1,4 +1,14 @@
+// import DemoPage from "./users/page";
+
 const Home = () => {
-  return <div><h2>Home</h2></div>;
+  return (
+    <>
+
+    <h1 className="">Home</h1>
+      {/* <div id="container">
+        <nav>{<DemoPage />}</nav>
+      </div> */}
+    </>
+  );
 };
 export default Home;
