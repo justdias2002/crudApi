@@ -6,6 +6,9 @@ import { columns, Usuario } from "./columns";
 import UsuarioForm from "./form";
 
 export default function DemoPage() {
+  
+  const API_BASEURL='http://localhost:3333'
+
   const [data, setData] = useState<Usuario[]>([]);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false); //editar
@@ -16,7 +19,7 @@ export default function DemoPage() {
     const fetchData = async () => {
       try {
         const result = await axios.get(
-          `${import.meta.env.API_BASEURL}/memories`
+          `${API_BASEURL}/memories`
         );
         setData(result.data);
       } catch (error) {
