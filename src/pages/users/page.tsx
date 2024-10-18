@@ -1,26 +1,52 @@
-import { Payment, columns } from "./columns"
-import { DataTable } from "./data-table"
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import { Usuario, columns } from './columns';
+import { DataTable } from './data-table';
 
-async function getData(): Promise<Payment[]> {
-  // Fetch data from your API here.
-  return [
-    {
-      id: "728ed52f",
-      amount: 100,
-      status: "pending",
-      email: "m@example.com",
-    },
-    // ...
-  ]
+
+
+
+async function getData(): Promise<Usuario[]> {
+  try {
+    const response = await axios.get('https://server-8cgs.onrender.com/memories');
+    console.log('Dados recebidos:', response.data);
+    return response.data.map((item: Usuario) => ({
+      id: item.id,       
+      cover: item.cover,   
+      expecpt: item.expecpt, 
+    }));
+  } catch (error) {
+    console.error('Erro ao buscar dados:', error);
+    return []; 
+  }
 }
 
-export default async function DemoPage() {
-  const data = await getData()
+export default function DemoPage() {
+  const [data, setData] = useState<Usuario[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const result = await getData();
+        setData(result);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  if (loading) {
+    return <div>Carregando...</div>;
+  }
 
   return (
-    
     <div className="container mx-auto py-10">
       <DataTable columns={columns} data={data} />
     </div>
-  )
+  );
 }
