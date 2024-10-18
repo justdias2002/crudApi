@@ -12,7 +12,7 @@ async function getData(): Promise<Usuario[]> {
     console.log('Dados recebidos:', response.data);
     return response.data.map((item: Usuario) => ({
       id: item.id,       
-      cover: item.cover,   
+      email: item.email,   
       expecpt: item.expecpt, 
     }));
   } catch (error) {
