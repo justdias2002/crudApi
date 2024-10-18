@@ -7,7 +7,7 @@ import { ColumnDef } from "@tanstack/react-table"
 export type Usuario = {
   id: string,
   email: string,
-  expecpt: string
+  name: string
   
 }
 
@@ -21,7 +21,7 @@ export const columns: ColumnDef<Usuario>[] = [
     header: "email",
   },
   {
-    accessorKey: "expecpt",
-    header: "expecpt",
+    accessorKey: "name",
+    header: "name",
   },
 ]

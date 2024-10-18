@@ -13,7 +13,7 @@ async function getData(): Promise<Usuario[]> {
     return response.data.map((item: Usuario) => ({
       id: item.id,       
       email: item.email,   
-      expecpt: item.expecpt, 
+      name: item.name, 
     }));
   } catch (error) {
     console.error('Erro ao buscar dados:', error);
