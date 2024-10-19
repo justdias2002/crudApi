@@ -1,60 +1,53 @@
-import { DataTable } from "./data-table";
 import { useState, useEffect } from "react";
 import axios from "axios";
-import { columns, Usuario } from "./columns";
-// import { Form } from "@/components/ui/form";
-import UsuarioForm from "./form";
+import UsuarioForm, { Usuario } from "./form";
 
 export default function DemoPage() {
+  const [users, setUsers] = useState<Usuario[]>([]);
+  const [currentUser, setCurrentUser] = useState<Usuario | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const API_BASEURL = import.meta.env.VITE_API_BASEURL;
+  // const API_BASEURL = import.meta.env.VITE_API_BASEURL; por em produçao depois
+
+
   
-  const API_BASEURL='http://localhost:3333'
-
-  const [data, setData] = useState<Usuario[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false); //editar
-  const [currentUser, setCurrentUser] = useState<Usuario | null>(null); // Usuário atual para edição
-
-  // (Read)
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const result = await axios.get(
-          `${API_BASEURL}/memories`
-        );
-        setData(result.data);
+        const result = await axios.get(`${API_BASEURL}`);
+        setUsers(result.data);
       } catch (error) {
         console.error("Erro ao buscar dados:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
     fetchData();
-  }, []);
+  }, [API_BASEURL]);
 
-  // (Create)
-  const createUser = async (newUser: Usuario) => {
+  
+  const handleCreate = async (newUser: Usuario) => {
     try {
-      const response = await axios.post(
-        `${import.meta.env.API_BASEURL}/memories`,
-        newUser
-      );
-      setData([...data, response.data]);
-      console.log(data);
+      const response = await axios.post(`${API_BASEURL}`, newUser);
+      setUsers([...users, response.data]);
     } catch (error) {
       console.error("Erro ao criar usuário:", error);
     }
   };
 
-  //(Update)
-  const updateUser = async (updatedUser: Usuario) => {
+  // Função para editar um usuário existente
+  const handleEdit = async (updatedUser: Usuario) => {
     try {
+      if (!updatedUser.id) {
+        console.error("ID do usuário é necessário para atualização");
+        return;
+      }
       const response = await axios.put(
-        `${import.meta.env.API_BASEURL}/memories`,
+        `${API_BASEURL}/${updatedUser.id}`,
         updatedUser
       );
-      setData(
-        data.map((user) => (user.id === updatedUser.id ? response.data : user))
+      setUsers(
+        users.map((user) => (user.id === updatedUser.id ? response.data : user))
       );
       setIsEditing(false);
       setCurrentUser(null);
@@ -63,44 +56,65 @@ export default function DemoPage() {
     }
   };
 
-  //(Delete)
-  const deleteUser = async (id: string) => {
+ 
+  const setUserToEdit = (user: Usuario) => {
+    setIsEditing(true);
+    setCurrentUser(user);
+  };
+
+  const handleDelete = async (id: string) => {
     try {
-      await axios.delete(`${import.meta.env.API_BASEURL}/memories`);
-      setData(data.filter((user) => user.id !== id));
+      await axios.delete(`${API_BASEURL}/${id}`);
+      setUsers(users.filter((user) => user.id !== id));
     } catch (error) {
       console.error("Erro ao deletar usuário:", error);
     }
   };
 
-  // Iniciar a edição de um usuário
-  const handleEdit = (user: Usuario) => {
-    setIsEditing(true);
-    setCurrentUser(user);
-  };
-
-  if (loading) {
-    return <div>Carregando...</div>;
-  }
-
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-2xl font-bold mb-4">CRUD de Usuários</h1>
+      <h1 className="text-2xl font-bold mb-4">Usuarios</h1>
 
-      {/* Formulário de criação ou edição */}
       <UsuarioForm
-        onSubmit={isEditing ? updateUser : createUser}
+        onCreate={handleCreate}
+        onEdit={handleEdit}
         currentUser={currentUser}
         isEditing={isEditing}
       />
 
-      {/* Tabela de dados */}
-      <DataTable
-        columns={columns}
-        data={data}
-        onEdit={handleEdit}
-        onDelete={deleteUser}
-      />
+      <table className="min-w-full bg-white">
+        <thead>
+          <tr>
+            <th className="py-2 px-4 border-b">ID</th>
+            <th className="py-2 px-4 border-b">Email</th>
+            <th className="py-2 px-4 border-b">Nome</th>
+            <th className="py-2 px-4 border-b">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {users.map((user) => (
+            <tr key={user.id}>
+              <td className="py-2 px-4 border-b">{user.id}</td>
+              <td className="py-2 px-4 border-b">{user.email}</td>
+              <td className="py-2 px-4 border-b">{user.name}</td>
+              <td className="py-2 px-4 border-b">
+                <button
+                  className="bg-green-400 text-white px-4 py-1 rounded mr-2"
+                  onClick={() => setUserToEdit(user)}
+                >
+                  Editar
+                </button>
+                <button
+                  className="bg-red-400 text-white px-4 py-1 rounded"
+                  onClick={() => handleDelete(user.id!)}
+                >
+                  Deletar
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

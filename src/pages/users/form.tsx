@@ -7,32 +7,37 @@ export interface Usuario {
   email: string;
 }
 
-export interface UsuarioFormProps {
-  onSubmit: (user: Usuario) => Promise<void>;
-  currentUser: Usuario | null;
-  isEditing: boolean;
+interface UsuarioFormProps {
+  onCreate: (user: Usuario) => Promise<void>; 
+  onEdit: (user: Usuario) => Promise<void>;  
+  currentUser: Usuario | null;               
+  isEditing: boolean;                        
 }
 
 export default function UsuarioForm({
-  onSubmit,
+  onCreate,
+  onEdit,
   currentUser,
   isEditing,
 }: UsuarioFormProps) {
-  // Usando o hook `useForm` para gerenciar o formulário
   const { register, handleSubmit, reset } = useForm<Usuario>();
 
-  // Atualiza os campos do formulário se estiver editando
+  
   useEffect(() => {
     if (isEditing && currentUser) {
-      reset(currentUser); // Preenche o formulário com os dados do usuário atual
+      reset(currentUser);
     } else {
-      reset(); // Reseta o formulário para valores vazios
+      reset(); 
     }
   }, [isEditing, currentUser, reset]);
 
   // Função de envio de formulário
   const onSubmitForm: SubmitHandler<Usuario> = (data) => {
-    onSubmit(data);
+    if (isEditing) {
+      onEdit({ ...data, id: currentUser?.id }); 
+    } else {
+      onCreate(data); 
+    }
   };
 
   return (
@@ -55,9 +60,14 @@ export default function UsuarioForm({
         />
       </div>
 
-      <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded">
-        {isEditing ? "Atualizar" : "Criar"}
-      </button>
+      <div className="flex space-x-2">
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+        >
+          {isEditing ? 'Atualizar' : 'Criar'}
+        </button>
+      </div>
     </form>
   );
 }
